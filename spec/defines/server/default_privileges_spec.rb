@@ -195,6 +195,71 @@ describe 'postgresql::server::default_privileges' do
       it { is_expected.to compile.and_raise_error(%r{Illegal value for \$privilege parameter}) }
     end
 
+    context 'trigger privilege' do
+      let :params do
+        {
+          db: 'test',
+          role: 'test',
+          privilege: 'trigger',
+          object_type: 'tables'
+        }
+      end
+
+      let :pre_condition do
+        "class {'postgresql::server':}"
+      end
+
+      it do
+        # rubocop:disable Layout/LineLength
+        expect(subject).to contain_postgresql_psql('default_privileges:test')
+          .with_command('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT TRIGGER ON TABLES TO "test"')
+          .with_unless("SELECT 1 WHERE EXISTS (SELECT * FROM pg_default_acl AS da LEFT JOIN pg_namespace AS n ON da.defaclnamespace = n.oid WHERE '\"test\"=t' = ANY (defaclacl) AND nspname = 'public' and defaclobjtype = 'r')")
+        # rubocop:enable Layout/LineLength
+      end
+    end
+
+    context 'comma-separated privileges' do
+      let :params do
+        {
+          db: 'test',
+          role: 'test',
+          privilege: 'insert, select,UPDATE',
+          object_type: 'tables'
+        }
+      end
+
+      let :pre_condition do
+        "class {'postgresql::server':}"
+      end
+
+      it { is_expected.to compile.with_all_deps }
+
+      it do
+        # rubocop:disable Layout/LineLength
+        expect(subject).to contain_postgresql_psql('default_privileges:test')
+          .with_command('ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT INSERT,SELECT,UPDATE ON TABLES TO "test"')
+          .with_unless("SELECT 1 WHERE EXISTS (SELECT * FROM pg_default_acl AS da LEFT JOIN pg_namespace AS n ON da.defaclnamespace = n.oid WHERE '\"test\"=arw' = ANY (defaclacl) AND nspname = 'public' and defaclobjtype = 'r')")
+        # rubocop:enable Layout/LineLength
+      end
+    end
+
+    context 'comma-separated privileges with an unsupported privilege' do
+      let :params do
+        {
+          db: 'test',
+          role: 'test',
+          privilege: 'select,usage',
+          object_type: 'tables'
+        }
+      end
+
+      let :pre_condition do
+        "class {'postgresql::server':}"
+      end
+
+      it { is_expected.to compile.and_raise_error(%r{Illegal value for \$privilege parameter}) }
+    end
+
     context 'schemas on postgres < 9.6' do
       include_examples 'RedHat 8'
 

@@ -75,61 +75,50 @@ define postgresql::server::default_privileges (
   ## Munge the input values
   $_object_type = upcase($object_type)
   $_privilege   = upcase($privilege)
+  $_privileges  = $_privilege.split(',').map |$p| { $p.strip }
 
+  # Map each privilege to its aclitem letters, see the PostgreSQL docs on privileges
   case $_object_type {
     # Routines and functions ends up with the same definition
     Pattern[
       /^ROUTINES$/,
       /^FUNCTIONS$/,
     ]: {
-      case $_privilege {
-        Pattern[
-          /^ALL$/,
-          /^EXECUTE$/,
-        ]: {
-          $_check_privilege = 'X'
-        }
-        default: { fail('Illegal value for $privilege parameter') }
+      $_privilege_map = {
+        'ALL'     => 'X',
+        'EXECUTE' => 'X',
       }
       $_check_type = 'f'
     }
     'SEQUENCES': {
-      case $_privilege {
-        /^(ALL)$/: { $_check_privilege = 'rwU' }
-        /^SELECT$/: { $_check_privilege = 'r' }
-        /^UPDATE$/: { $_check_privilege = 'w' }
-        /^USAGE$/: { $_check_privilege = 'U' }
-        default: { fail('Illegal value for $privilege parameter') }
+      $_privilege_map = {
+        'ALL'    => 'rwU',
+        'SELECT' => 'r',
+        'UPDATE' => 'w',
+        'USAGE'  => 'U',
       }
       $_check_type = 'S'
     }
     'TABLES': {
-      case $_privilege {
-        /^ALL$/: {
-          # Some platforms report legacy 9.x versions without the dot, e.g. '96'.
-          $_version = regsubst($version, '^9(\d)$', '9.\1')
-          # PostgreSQL 17 added the MAINTAIN privilege ('m'), which ALL includes.
-          if (versioncmp($_version, '17') == -1) {
-            $_check_privilege = 'arwdDxt'
-          } else {
-            $_check_privilege = 'arwdDxtm'
-          }
-        }
-        /^DELETE$/: { $_check_privilege = 'd' }
-        /^INSERT$/: { $_check_privilege = 'a' }
-        /^REFERENCES$/: { $_check_privilege = 'x' }
-        /^SELECT$/: { $_check_privilege = 'r' }
-        /^TRIGGER$/: { $_check_privilege = 'd' }
-        /^TRUNCATE$/: { $_check_privilege = 'D' }
-        /^UPDATE$/: { $_check_privilege = 'w' }
-        default: { fail('Illegal value for $privilege parameter') }
+      # Some platforms report legacy 9.x versions without the dot, e.g. '96'.
+      $_version = regsubst($version, '^9(\d)$', '9.\1')
+      # PostgreSQL 17 added the MAINTAIN privilege ('m'), which ALL includes.
+      $_privilege_map = {
+        'ALL'        => versioncmp($_version, '17') ? { -1 => 'arwdDxt', default => 'arwdDxtm' },
+        'DELETE'     => 'd',
+        'INSERT'     => 'a',
+        'REFERENCES' => 'x',
+        'SELECT'     => 'r',
+        'TRIGGER'    => 't',
+        'TRUNCATE'   => 'D',
+        'UPDATE'     => 'w',
       }
       $_check_type = 'r'
     }
     'TYPES': {
-      case $_privilege {
-        /^(ALL|USAGE)$/: { $_check_privilege = 'U' }
-        default: { fail('Illegal value for $privilege parameter') }
+      $_privilege_map = {
+        'ALL'   => 'U',
+        'USAGE' => 'U',
       }
       $_check_type = 'T'
     }
@@ -140,11 +129,10 @@ define postgresql::server::default_privileges (
       if $schema != '' {
         fail('Cannot alter default schema permissions within a schema')
       }
-      case $_privilege {
-        /^ALL$/: { $_check_privilege = 'UC' }
-        /^USAGE$/: { $_check_privilege = 'U' }
-        /^CREATE$/: { $_check_privilege = 'C' }
-        default: { fail('Illegal value for $privilege parameter') }
+      $_privilege_map = {
+        'ALL'    => 'UC',
+        'USAGE'  => 'U',
+        'CREATE' => 'C',
       }
       $_check_type = 'n'
     }
@@ -153,13 +141,17 @@ define postgresql::server::default_privileges (
     }
   }
 
+  $_check_privilege = $_privileges.map |$p| {
+    $_privilege_map[$p].lest || { fail('Illegal value for $privilege parameter') }
+  }.join('').split('').unique.join('')
+
   $_unless = $ensure ? {
     'absent' => "SELECT 1 WHERE NOT EXISTS (SELECT * FROM pg_default_acl AS da LEFT JOIN pg_namespace AS n ON da.defaclnamespace = n.oid WHERE '\"%s\"=%s%s' = ANY (defaclacl)%s and defaclobjtype = '%s')", # lint:ignore:140chars
     default  => "SELECT 1 WHERE EXISTS (SELECT * FROM pg_default_acl AS da LEFT JOIN pg_namespace AS n ON da.defaclnamespace = n.oid WHERE '\"%s\"=%s%s' = ANY (defaclacl)%s and defaclobjtype = '%s')", # lint:ignore:140chars
   }
 
   $unless_cmd = sprintf($_unless, $role, $_check_privilege, $_check_target_role, $_check_schema, $_check_type)
-  $grant_cmd = sprintf($sql_command, $_target_role, $_schema, $_privilege, $_object_type, $role)
+  $grant_cmd = sprintf($sql_command, $_target_role, $_schema, $_privileges.join(','), $_object_type, $role)
 
   postgresql_psql { "default_privileges:${name}":
     command          => $grant_cmd,
