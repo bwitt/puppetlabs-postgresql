@@ -34,7 +34,7 @@ recovery_target_time = '<%= $recovery_target_time %>'
 <% if $recovery_target_xid { -%>
 recovery_target_xid = '<%= $recovery_target_xid %>'
 <% } -%>
-<% if $recovery_target_inclusive { -%>
+<% if $recovery_target_inclusive =~ Boolean { -%>
 recovery_target_inclusive = <%= $recovery_target_inclusive %>
 <% } -%>
 <% if $recovery_target { -%>
@@ -43,7 +43,7 @@ recovery_target = '<%= $recovery_target %>'
 <% if $recovery_target_timeline { -%>
 recovery_target_timeline = '<%= $recovery_target_timeline %>'
 <% } -%>
-<% if $pause_at_recovery_target { -%>
+<% if $pause_at_recovery_target =~ Boolean { -%>
 pause_at_recovery_target = <%= $pause_at_recovery_target %>
 <% } -%>
 
