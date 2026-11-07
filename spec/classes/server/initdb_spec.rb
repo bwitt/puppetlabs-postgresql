@@ -105,4 +105,21 @@ describe 'postgresql::server::initdb' do
       expect(subject).to contain_postgresql_psql('Set template1 encoding to test').with(cwd: '/var/tmp')
     end
   end
+
+  describe 'locale and lc_messages' do
+    include_examples 'RedHat 8'
+
+    context 'with only locale' do
+      let(:pre_condition) { "class { 'postgresql::server': locale => 'en_US.UTF-8' }" }
+
+      it { is_expected.to contain_exec('postgresql_initdb_instance_main').with_command(%r{--locale 'en_US\.UTF-8'}) }
+      it { expect(catalogue.resource('Exec', 'postgresql_initdb_instance_main')[:command]).not_to match(%r{--lc-messages}) }
+    end
+
+    context 'with only lc_messages' do
+      let(:pre_condition) { "class { 'postgresql::server': lc_messages => 'C' }" }
+
+      it { is_expected.to contain_exec('postgresql_initdb_instance_main').with_command(%r{--lc-messages 'C'}) }
+    end
+  end
 end

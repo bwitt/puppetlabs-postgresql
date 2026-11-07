@@ -158,7 +158,7 @@ define postgresql::server::instance::initdb (
       default => "--encoding '${encoding}'"
     }
 
-    $lc_messages_parameter = $locale ? {
+    $lc_messages_parameter = $lc_messages ? {
       undef   => undef,
       default => "--lc-messages '${lc_messages}'"
     }
