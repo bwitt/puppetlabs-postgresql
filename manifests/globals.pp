@@ -269,7 +269,11 @@ class postgresql::globals (
     '10'    => '2.4',
     '11'    => '3.0',
     '12'    => '3.0',
+    '14'    => '3.2',
+    '15'    => '3.3',
     '16'    => '3.4',
+    '17'    => '3.5',
+    '18'    => '3.6',
     default => undef,
   }
   $globals_postgis_version = $postgis_version ? {

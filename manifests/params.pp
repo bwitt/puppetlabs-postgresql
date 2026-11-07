@@ -103,6 +103,10 @@ class postgresql::params inherits postgresql::globals {
         $postgis_package_name = 'postgis'
       } elsif $postgis_version and versioncmp($postgis_version, '2') < 0 {
         $postgis_package_name = "postgis${package_version}"
+      } elsif $postgis_version and versioncmp($postgis_version, '2.4') >= 0 {
+        # PGDG names packages after the PostGIS major/minor version, e.g. postgis34_16
+        $postgis_version_parts = split($postgis_version, '[.]')
+        $postgis_package_name = "postgis${postgis_version_parts[0]}${postgis_version_parts[1]}_${package_version}"
       } else {
         $postgis_package_name = "postgis2_${package_version}"
       }
