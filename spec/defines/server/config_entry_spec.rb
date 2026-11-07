@@ -33,6 +33,14 @@ describe 'postgresql::server::config_entry' do
     end
   end
 
+  context 'with a dash in the title' do
+    let(:title) { 'authentication_timeout_TEST-PG-1' }
+    let(:params) { { ensure: 'present', key: 'authentication_timeout', value: '60s' } }
+
+    it { is_expected.to compile.with_all_deps }
+    it { is_expected.to contain_postgresql_conf('authentication_timeout_TEST-PG-1').with_key('authentication_timeout') }
+  end
+
   context 'passes values through appropriately' do
     let(:params) { { ensure: 'present', name: 'check_function_bodies', value: 'off' } }
 

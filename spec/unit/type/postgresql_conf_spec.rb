@@ -21,6 +21,10 @@ describe Puppet::Type.type(:postgresql_conf) do
     it 'allows dots in names' do
       expect { described_class.new(name: 'foo.bar') }.not_to raise_error
     end
+
+    it 'allows dashes in names' do
+      expect { described_class.new(name: 'foo_TEST-PG-1') }.not_to raise_error
+    end
   end
 
   describe 'when validating attributes' do

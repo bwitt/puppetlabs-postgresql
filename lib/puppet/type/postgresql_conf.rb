@@ -6,7 +6,7 @@ Puppet::Type.newtype(:postgresql_conf) do
 
   newparam(:name) do
     desc 'A unique title for the resource.'
-    newvalues(%r{^[\w.]+$})
+    newvalues(%r{^[\w.-]+$})
   end
 
   newparam(:key) do
