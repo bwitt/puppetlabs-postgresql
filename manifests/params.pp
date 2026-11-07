@@ -211,7 +211,7 @@ class postgresql::params inherits postgresql::globals {
       $contrib_package_name = pick($contrib_package_name, "databases/postgresql${version}-contrib")
       $devel_package_name   = pick($devel_package_name, 'databases/postgresql-libpqxx3')
       $java_package_name    = pick($java_package_name, 'databases/postgresql-jdbc')
-      $perl_package_name    = pick($plperl_package_name, 'databases/p5-DBD-Pg')
+      $perl_package_name    = pick($perl_package_name, 'databases/p5-DBD-Pg')
       $plperl_package_name  = pick($plperl_package_name, "databases/postgresql${version}-plperl")
       $python_package_name  = pick($python_package_name, 'databases/py-psycopg2')
 
@@ -259,7 +259,7 @@ class postgresql::params inherits postgresql::globals {
       $contrib_package_name = pick($contrib_package_name, "postgresql${version}-contrib")
       $devel_package_name   = pick($devel_package_name, "postgresql${version}-devel")
       $java_package_name    = pick($java_package_name, "postgresql${version}-jdbc")
-      $perl_package_name    = pick($plperl_package_name, 'perl-DBD-Pg')
+      $perl_package_name    = pick($perl_package_name, 'perl-DBD-Pg')
       $plperl_package_name  = pick($plperl_package_name, "postgresql${version}-plperl")
       $python_package_name  = pick($python_package_name, 'python-psycopg2')
 
