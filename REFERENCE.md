@@ -80,7 +80,7 @@
 
 #### Public Functions
 
-* [`postgresql::default`](#postgresql--default): This function pull default values from the `params` class  or `globals` class if the value is not present in `params`.
+* [`postgresql::default`](#postgresql--default): This function pull default values from the `postgresql::server` class if it is declared, otherwise from the `params` class or `globals` class if the value is not present in `params`.
 * [`postgresql::postgresql_escape`](#postgresql--postgresql_escape): This function escapes a string using [Dollar Quoting](https://www.postgresql.org/docs/12/sql-syntax-lexical.html#SQL-SYNTAX-DOLLAR-QUOTING) using a randomly generated tag if required.
 * [`postgresql::postgresql_password`](#postgresql--postgresql_password): This function returns the postgresql password hash from the clear text username / password
 * [`postgresql::prepend_sql_password`](#postgresql--prepend_sql_password): This function exists for usage of a role password that is a deferred function
@@ -2357,7 +2357,7 @@ Data type: `String`
 
 Specifies the database to execute the grant against. This should not ordinarily be changed from the default
 
-Default value: `$postgresql::server::default_database`
+Default value: `postgresql::default('default_database')`
 
 ##### <a name="-postgresql--server--grant--psql_user"></a>`psql_user`
 
@@ -2365,7 +2365,7 @@ Data type: `String`
 
 Sets the OS user to run psql.
 
-Default value: `$postgresql::server::user`
+Default value: `postgresql::default('user')`
 
 ##### <a name="-postgresql--server--grant--port"></a>`port`
 
@@ -2373,7 +2373,7 @@ Data type: `Stdlib::Port`
 
 Port to use when connecting.
 
-Default value: `$postgresql::server::port`
+Default value: `postgresql::default('port')`
 
 ##### <a name="-postgresql--server--grant--onlyif_exists"></a>`onlyif_exists`
 
@@ -2389,7 +2389,7 @@ Data type: `Hash`
 
 Specifies a hash of environment variables used when connecting to a remote server.
 
-Default value: `$postgresql::server::default_connect_settings`
+Default value: `postgresql::default('default_connect_settings')`
 
 ##### <a name="-postgresql--server--grant--ensure"></a>`ensure`
 
@@ -2405,7 +2405,7 @@ Data type: `String`
 
 Sets the OS group to run psql
 
-Default value: `$postgresql::server::group`
+Default value: `postgresql::default('group')`
 
 ##### <a name="-postgresql--server--grant--psql_path"></a>`psql_path`
 
@@ -2413,7 +2413,7 @@ Data type: `Stdlib::Absolutepath`
 
 Sets the path to psql command
 
-Default value: `$postgresql::server::psql_path`
+Default value: `postgresql::default('psql_path')`
 
 ##### <a name="-postgresql--server--grant--instance"></a>`instance`
 
@@ -4697,7 +4697,7 @@ Puppet will usually discover the appropriate provider for your platform.
 
 Type: Puppet Language
 
-This function pull default values from the `params` class  or `globals` class if the value is not present in `params`.
+This function pull default values from the `postgresql::server` class if it is declared, otherwise from the `params` class or `globals` class if the value is not present in `params`.
 
 #### Examples
 
