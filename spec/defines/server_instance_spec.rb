@@ -124,6 +124,9 @@ describe 'postgresql::server_instance' do
     it { is_expected.to contain_systemd__dropin_file('postgresql@13-test1.conf') }
     it { is_expected.to contain_postgresql_conn_validator('validate_service_is_running_instance_test1') }
     it { is_expected.to contain_postgresql_conf('port_for_instance_test1') }
+    it { is_expected.to contain_postgresql_conf('port_for_instance_test1').that_requires('Postgresql::Server::Instance::Initdb[test1]') }
+    it { is_expected.to contain_postgresql_conf('port_for_instance_test1').that_notifies('Postgresql::Server::Instance::Service[test1]') }
+    it { is_expected.not_to contain_postgresql_conf('port_for_instance_test1').that_notifies('Postgresql::Server::Instance::Service[main]') }
     it { is_expected.to contain_postgresql_conf('log_statement_stats_test1') }
     it { is_expected.to contain_postgresql_conf('data_directory_for_instance_test1') }
     it { is_expected.to contain_postgresql_conf('autovacuum_vacuum_scale_factor_test1') }

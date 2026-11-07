@@ -156,7 +156,8 @@ define postgresql::server::instance::config (
   # set default postgresql_conf_path here so the path is configurable in instances for
   # default values like port or listen_address
   Postgresql::Server::Config_entry {
-    path => $postgresql_conf_path,
+    path          => $postgresql_conf_path,
+    instance_name => $name,
   }
 
   if $manage_postgresql_conf_perms {
