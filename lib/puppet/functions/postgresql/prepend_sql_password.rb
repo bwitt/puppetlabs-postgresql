@@ -9,6 +9,7 @@ Puppet::Functions.create_function(:'postgresql::prepend_sql_password') do
     return_type 'String'
   end
   def default_impl(password)
-    "ENCRYPTED PASSWORD '#{password}'"
+    # Double single quotes so the password stays a valid SQL string literal
+    "ENCRYPTED PASSWORD '#{password.gsub("'", "''")}'"
   end
 end

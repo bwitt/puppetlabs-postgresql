@@ -178,6 +178,19 @@ describe 'postgresql::server::role' do
     end
   end
 
+  context 'with a single quote in the password' do
+    let :params do
+      {
+        password_hash: "pa'ss"
+      }
+    end
+
+    it 'escapes the quote in create role' do
+      expect(subject).to contain_postgresql_psql('CREATE ROLE test ENCRYPTED PASSWORD ****')
+        .with_command(sensitive(%(CREATE ROLE "test" ENCRYPTED PASSWORD 'pa''ss' LOGIN NOCREATEROLE NOCREATEDB NOSUPERUSER  CONNECTION LIMIT -1)))
+    end
+  end
+
   context 'with update_password set to false' do
     let :params do
       {
