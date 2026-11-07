@@ -45,4 +45,25 @@ describe 'postgresql::default' do
 
     it { is_expected.to run.with_params('password_encryption').and_return('scram-sha-256') }
   end
+
+  # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1721
+  context 'on Fedora' do
+    { '41' => '16', '42' => '16', '43' => '18', '44' => '18', '45' => '18' }.each do |release, version|
+      context "release #{release}" do
+        let(:facts) do
+          {
+            'os' => {
+              'family' => 'RedHat',
+              'name' => 'Fedora',
+              'release' => { 'full' => release, 'major' => release },
+              'selinux' => { 'enabled' => false },
+            },
+            'service_provider' => 'systemd',
+          }
+        end
+
+        it { is_expected.to run.with_params('version').and_return(version) }
+      end
+    end
+  end
 end
