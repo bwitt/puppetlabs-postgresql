@@ -673,7 +673,8 @@ Default value: `undef`
 Data type: `Boolean`
 
 Manage the DNF module. This only makes sense on distributions that use DNF
-package manager, such as EL8, EL9 or Fedora.
+package manager, such as EL8, EL9 or Fedora. When false and manage_package_repo
+is true on EL8, the postgresql module is disabled so the PGDG packages can be installed.
 
 Default value: `false`
 

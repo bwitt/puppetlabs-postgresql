@@ -101,7 +101,8 @@
 # @param manage_package_repo Sets up official PostgreSQL repositories on your host if set to true.
 # @param manage_dnf_module
 #   Manage the DNF module. This only makes sense on distributions that use DNF
-#   package manager, such as EL8, EL9 or Fedora.
+#   package manager, such as EL8, EL9 or Fedora. When false and manage_package_repo
+#   is true on EL8, the postgresql module is disabled so the PGDG packages can be installed.
 # @param module_workdir
 #   Specifies working directory under which the psql command should be executed.
 #   May need to specify if '/tmp' is on volume mounted with noexec option.
@@ -291,6 +292,11 @@ class postgresql::globals (
   if $manage_dnf_module {
     class { 'postgresql::dnfmodule':
       ensure => $globals_version,
+    }
+  } elsif $manage_package_repo and $facts['os']['family'] == 'RedHat' and $facts['os']['name'] != 'Fedora' and $facts['os']['release']['major'] == '8' {
+    # EL8 enables the postgresql module stream by default, which hides the PGDG packages
+    class { 'postgresql::dnfmodule':
+      ensure => 'disabled',
     }
   }
 }

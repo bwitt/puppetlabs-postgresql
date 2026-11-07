@@ -28,6 +28,16 @@ describe 'postgresql::globals' do
   context 'on redhat 8' do
     include_examples 'RedHat 8'
 
+    describe 'without manage_package_repo' do
+      it { is_expected.not_to contain_package('postgresql dnf module') }
+    end
+
+    describe 'manage_package_repo and manage_dnf_module => true' do
+      let(:params) { { manage_package_repo: true, manage_dnf_module: true, version: '16' } }
+
+      it { is_expected.to contain_package('postgresql dnf module').with_ensure('16').with_enable_only(true) }
+    end
+
     describe 'with no parameters' do
       it 'executes successfully' do
         expect(subject).to contain_class('postgresql::globals')
@@ -40,6 +50,11 @@ describe 'postgresql::globals' do
           manage_package_repo: true,
           repo_proxy: 'http://proxy-server:8080'
         }
+      end
+
+      # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1398
+      it 'disables the postgresql dnf module' do
+        expect(subject).to contain_package('postgresql dnf module').with(ensure: 'disabled', name: 'postgresql', provider: 'dnfmodule').without_enable_only
       end
 
       it 'pulls in class postgresql::repo' do

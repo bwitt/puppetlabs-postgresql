@@ -12,10 +12,16 @@ class postgresql::dnfmodule (
   if $facts['os']['release']['major'] == '10' {
     fail('DNF modules are not supported on EL 10')
   }
+  # enable_only cannot be combined with disabling a module
+  $enable_only = $ensure ? {
+    'disabled' => undef,
+    default    => true,
+  }
+
   package { 'postgresql dnf module':
     ensure      => $ensure,
     name        => $module,
-    enable_only => true,
+    enable_only => $enable_only,
     provider    => 'dnfmodule',
   }
 
