@@ -19,6 +19,16 @@ describe 'postgresql::server' do
     end
   end
 
+  describe 'with listen_addresses as an array' do
+    let(:params) { { listen_addresses: ['192.0.2.1', '127.0.0.1'] } }
+
+    it {
+      expect(subject).to contain_postgresql_conf('listen_addresses_for_instance_main')
+        .with_key('listen_addresses')
+        .with_value('192.0.2.1,127.0.0.1')
+    }
+  end
+
   describe 'with manage_dnf_module true' do
     include_examples 'RedHat 8'
 

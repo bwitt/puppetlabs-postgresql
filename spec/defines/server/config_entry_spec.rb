@@ -51,6 +51,15 @@ describe 'postgresql::server::config_entry' do
     end
   end
 
+  context 'passes an array value as a comma-separated list' do
+    let(:params) { { ensure: 'present', name: 'listen_addresses', value: ['192.0.2.1', '127.0.0.1'] } }
+
+    it 'and joins all elements' do
+      expect(subject).to contain_postgresql_conf('listen_addresses').with(name: 'listen_addresses',
+                                                                          value: '192.0.2.1,127.0.0.1')
+    end
+  end
+
   context 'passes an integer value through appropriately' do
     let(:params) { { ensure: 'present', name: 'integer_value', value: 40 } }
 

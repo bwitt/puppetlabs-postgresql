@@ -86,11 +86,17 @@ define postgresql::server::config_entry (
     }
   }
 
+  # PostgreSQL list settings are comma-separated; Puppet would only manage the first element of an Array
+  $_value = $value ? {
+    Array   => $value.join(','),
+    default => $value,
+  }
+
   postgresql_conf { $name:
     ensure  => $ensure,
     target  => $path,
     key     => $key,
-    value   => $value,
+    value   => $_value,
     comment => $comment,
     require => Postgresql::Server::Instance::Initdb[$instance_name],
   }
