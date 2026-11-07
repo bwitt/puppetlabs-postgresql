@@ -25,6 +25,43 @@ describe 'postgresql::server::grant' do
     it { is_expected.to contain_postgresql__server__grant('test') }
   end
 
+  # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1554
+  context 'with a custom port on postgresql::server' do
+    let :params do
+      {
+        db: 'test',
+        role: 'test'
+      }
+    end
+
+    let :pre_condition do
+      "class {'postgresql::server': port => 5433 }"
+    end
+
+    it { is_expected.to contain_postgresql_psql('grant:test').with_port(5433) }
+  end
+
+  # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1329
+  context 'with connect_settings and without postgresql::server' do
+    let :params do
+      {
+        db: 'test',
+        role: 'test',
+        connect_settings: { 'PGHOST' => 'postgres-db-server', 'PGPORT' => '1234' }
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    it {
+      expect(subject).to contain_postgresql_psql('grant:test')
+        .with_port('1234')
+        .with_db('postgres')
+        .with_psql_user('postgres')
+        .with_connect_settings('PGHOST' => 'postgres-db-server', 'PGPORT' => '1234')
+    }
+  end
+
   context 'sequence' do
     let :params do
       {

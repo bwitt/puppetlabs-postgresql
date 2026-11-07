@@ -178,6 +178,15 @@ describe 'postgresql::server::role' do
     end
   end
 
+  # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1554
+  context 'with a custom port on postgresql::server' do
+    let :pre_condition do
+      "class {'postgresql::server': port => 5433 }"
+    end
+
+    it { is_expected.to contain_postgresql_psql('CREATE ROLE test ENCRYPTED PASSWORD ****').with_port(5433) }
+  end
+
   context 'with update_password set to false' do
     let :params do
       {

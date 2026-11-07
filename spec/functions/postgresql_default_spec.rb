@@ -34,6 +34,27 @@ describe 'postgresql::default' do
 
   it { is_expected.to run.with_params('a_parameter_that_does_not_exist').and_raise_error(Puppet::ParseError, %r{pick\(\): must receive at least one non empty value}) }
 
+  context 'with values set on postgresql::server' do
+    let(:pre_condition) do
+      <<~PUPPET
+      class { 'postgresql::server':
+        port => 5433,
+      }
+      PUPPET
+    end
+
+    it { is_expected.to run.with_params('port').and_return(5433) }
+
+    # not a postgresql::server parameter
+    it { is_expected.to run.with_params('version').and_return('13') }
+  end
+
+  context 'without postgresql::server' do
+    let(:pre_condition) { '' }
+
+    it { is_expected.to run.with_params('port').and_return(5432) }
+  end
+
   context 'with overridden values' do
     let(:pre_condition) do
       <<~PUPPET
