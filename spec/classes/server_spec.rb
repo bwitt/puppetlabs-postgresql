@@ -19,6 +19,43 @@ describe 'postgresql::server' do
     end
   end
 
+  # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1541
+  # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1631
+  describe 'with encoding set and no initdb' do
+    context 'via postgresql::server' do
+      let(:params) { { encoding: 'UTF-8' } }
+
+      it { is_expected.to compile.with_all_deps }
+      it { is_expected.to contain_postgresql_psql('Set template1 encoding to UTF-8').that_comes_before('Anchor[postgresql::server::service::end::main]') }
+    end
+
+    context 'via postgresql::globals' do
+      let(:pre_condition) do
+        <<-PUPPET
+        class { 'postgresql::globals':
+          encoding => 'UTF-8',
+        }
+        PUPPET
+      end
+
+      it { is_expected.to compile.with_all_deps }
+      it { is_expected.to contain_postgresql_psql('Set template1 encoding to UTF-8') }
+    end
+
+    context 'with a config_entry' do
+      let(:params) { { encoding: 'UTF8' } }
+      let(:post_condition) do
+        <<-PUPPET
+        postgresql::server::config_entry { 'wal_level':
+          value => 'replica',
+        }
+        PUPPET
+      end
+
+      it { is_expected.to compile.with_all_deps }
+    end
+  end
+
   describe 'with manage_dnf_module true' do
     include_examples 'RedHat 8'
 
