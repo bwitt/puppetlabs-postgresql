@@ -323,6 +323,7 @@ describe 'postgresql::server' do
       expect(subject).to contain_file('/usr/local/sbin/pg_dump.sh')
         .with_content(%r{.*pg_dumpall \$_pg_args --file=\$\{FILE\} \$@ \|\| _rc=\$\?.*})
         .with_content(%r{^if \[ \$_rc -eq 0 \] ; then$})
+        .with_content(%r{^exit \$_rc$})
     }
 
     context 'with multiple databases in directory format' do
