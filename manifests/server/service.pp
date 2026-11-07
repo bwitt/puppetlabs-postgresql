@@ -6,7 +6,7 @@ class postgresql::server::service {
     service_manage   => $postgresql::server::service_manage,
     service_name     => $postgresql::server::service_name,
     service_provider => $postgresql::server::service_provider,
-    service_status   => $postgresql::server::service_status,
+    service_status   => $postgresql::server::_service_status,
     user             => $postgresql::server::user,
     port             => $postgresql::server::port,
     default_database => $postgresql::server::default_database,

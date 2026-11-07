@@ -23,7 +23,7 @@ define postgresql::server::instance::service (
   Boolean                                      $service_manage   = $postgresql::server::service_manage,
   String[1]                                    $service_name     = $postgresql::server::service_name,
   Optional[String[1]]                          $service_provider = $postgresql::server::service_provider,
-  String[1]                                    $service_status   = $postgresql::server::service_status,
+  String[1]                                    $service_status   = $postgresql::server::_service_status,
   String[1]                                    $user             = $postgresql::server::user,
   Stdlib::Port                                 $port             = $postgresql::server::port,
   String[1]                                    $default_database = $postgresql::server::default_database,

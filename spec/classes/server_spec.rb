@@ -19,6 +19,21 @@ describe 'postgresql::server' do
     end
   end
 
+  # https://github.com/puppetlabs/puppetlabs-postgresql/issues/1378
+  describe 'with a custom service_name' do
+    let(:params) { { service_name: 'postgresql@13-main' } }
+
+    it { is_expected.to contain_service('postgresqld_instance_main').with_name('postgresql@13-main').with_status('systemctl is-active --quiet postgresql@13-main') }
+    it { is_expected.to contain_exec('postgresql_reload_main').with_command('systemctl reload postgresql@13-main').with_onlyif('systemctl is-active --quiet postgresql@13-main') }
+
+    context 'with explicit service commands' do
+      let(:params) { { service_name: 'postgresql@13-main', service_status: '/bin/true', service_reload: '/bin/reload' } }
+
+      it { is_expected.to contain_service('postgresqld_instance_main').with_status('/bin/true') }
+      it { is_expected.to contain_exec('postgresql_reload_main').with_command('/bin/reload').with_onlyif('/bin/true') }
+    end
+  end
+
   describe 'with manage_dnf_module true' do
     include_examples 'RedHat 8'
 

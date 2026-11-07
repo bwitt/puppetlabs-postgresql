@@ -196,6 +196,17 @@ class postgresql::server (
 ) inherits postgresql::params {
   $_version = $postgresql::params::version
 
+  # The default status and reload commands embed the default service name, so follow a custom one
+  $_default_service_name = "\\b${regexpescape($postgresql::params::service_name)}\\b"
+  $_service_status = ($service_status == $postgresql::params::service_status) ? {
+    true    => regsubst($service_status, $_default_service_name, $service_name),
+    default => $service_status,
+  }
+  $_service_reload = ($service_reload == $postgresql::params::service_reload) ? {
+    true    => regsubst($service_reload, $_default_service_name, $service_name),
+    default => $service_reload,
+  }
+
   # Reload has its own ordering, specified by other defines
   class { 'postgresql::server::reload':
     require => Class['postgresql::server::install'],

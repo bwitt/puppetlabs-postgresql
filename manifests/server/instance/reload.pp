@@ -3,8 +3,8 @@
 # @param service_reload Overrides the default reload command for your PostgreSQL service.
 # @param service_status Overrides the default status check command for your PostgreSQL service.
 define postgresql::server::instance::reload (
-  String[1] $service_status = $postgresql::server::service_status,
-  String[1] $service_reload = $postgresql::server::service_reload,
+  String[1] $service_status = $postgresql::server::_service_status,
+  String[1] $service_reload = $postgresql::server::_service_reload,
 ) {
   exec { "postgresql_reload_${name}":
     path        => '/usr/bin:/usr/sbin:/bin:/sbin',
