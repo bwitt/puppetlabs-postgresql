@@ -73,6 +73,35 @@ describe 'postgresql::server::grant' do
     end
   end
 
+  context 'ALL PRIVILEGES' do
+    let :pre_condition do
+      "class {'postgresql::server':}"
+    end
+
+    {
+      'table' => ['test', 'has_table_privilege', 'INSERT'],
+      'sequence' => ['test', 'has_sequence_privilege', 'USAGE'],
+    }.each do |object_type, (object_name, function, check)|
+      context "on a #{object_type}" do
+        let :params do
+          {
+            db: 'test',
+            role: 'test',
+            privilege: 'all privileges',
+            object_type: object_type,
+            object_name: object_name
+          }
+        end
+
+        it do
+          expect(subject).to contain_postgresql_psql('grant:test')
+            .with_command(%r{GRANT ALL PRIVILEGES ON #{object_type.upcase} "test" TO\s* "test"}m)
+            .with_unless("SELECT 1 WHERE #{function}('test', 'test', '#{check}') = true")
+        end
+      end
+    end
+  end
+
   context 'all sequences' do
     let :params do
       {

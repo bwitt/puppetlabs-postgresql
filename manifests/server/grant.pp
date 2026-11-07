@@ -136,10 +136,10 @@ define postgresql::server::grant (
     }
     'SEQUENCE': {
       $unless_privilege = $_privilege ? {
-        'ALL'   => 'USAGE',
+        'ALL'            => 'USAGE',
+        'ALL PRIVILEGES' => 'USAGE',
         Pattern[
           /^$/,
-          /^ALL PRIVILEGES$/,
           /^SELECT$/,
           /^UPDATE$/,
           /^USAGE$/,
@@ -264,11 +264,10 @@ define postgresql::server::grant (
     }
     'TABLE': {
       $unless_privilege = $_privilege ? {
-        'ALL'   => 'INSERT',
+        'ALL'            => 'INSERT',
+        'ALL PRIVILEGES' => 'INSERT',
         Pattern[
           /^$/,
-          /^ALL$/,
-          /^ALL PRIVILEGES$/,
           /^DELETE$/,
           /^INSERT$/,
           /^REFERENCES$/,
