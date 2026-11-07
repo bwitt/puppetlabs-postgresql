@@ -2436,6 +2436,8 @@ The following parameters are available in the `postgresql::server::grant_role` d
 * [`ensure`](#-postgresql--server--grant_role--ensure)
 * [`psql_db`](#-postgresql--server--grant_role--psql_db)
 * [`psql_user`](#-postgresql--server--grant_role--psql_user)
+* [`psql_group`](#-postgresql--server--grant_role--psql_group)
+* [`psql_path`](#-postgresql--server--grant_role--psql_path)
 * [`port`](#-postgresql--server--grant_role--port)
 * [`connect_settings`](#-postgresql--server--grant_role--connect_settings)
 * [`instance`](#-postgresql--server--grant_role--instance)
@@ -2477,6 +2479,22 @@ Data type: `String[1]`
 Sets the OS user to run psql.
 
 Default value: `$postgresql::server::user`
+
+##### <a name="-postgresql--server--grant_role--psql_group"></a>`psql_group`
+
+Data type: `String[1]`
+
+Sets the OS group to run psql.
+
+Default value: `$postgresql::server::group`
+
+##### <a name="-postgresql--server--grant_role--psql_path"></a>`psql_path`
+
+Data type: `Stdlib::Absolutepath`
+
+Sets the path to the psql command.
+
+Default value: `$postgresql::server::psql_path`
 
 ##### <a name="-postgresql--server--grant_role--port"></a>`port`
 

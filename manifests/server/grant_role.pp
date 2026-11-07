@@ -5,6 +5,8 @@
 # @param ensure Specifies whether to grant or revoke the membership. Valid options: 'present' or 'absent'.
 # @param psql_db Specifies the database to execute the grant against. This should not ordinarily be changed from the default
 # @param psql_user Sets the OS user to run psql.
+# @param psql_group Sets the OS group to run psql.
+# @param psql_path Sets the path to the psql command.
 # @param port Port to use when connecting.
 # @param connect_settings Specifies a hash of environment variables used when connecting to a remote server.
 # @param instance The name of the Postgresql database instance.
@@ -15,6 +17,8 @@ define postgresql::server::grant_role (
   String[1]                                 $instance         = 'main',
   String[1]                                 $psql_db          = $postgresql::server::default_database,
   String[1]                                 $psql_user        = $postgresql::server::user,
+  String[1]                                 $psql_group       = $postgresql::server::group,
+  Stdlib::Absolutepath                      $psql_path        = $postgresql::server::psql_path,
   Stdlib::Port                              $port             = $postgresql::server::port,
   Hash                                      $connect_settings = $postgresql::server::default_connect_settings,
 ) {
@@ -37,6 +41,8 @@ define postgresql::server::grant_role (
     unless           => "SELECT 1 WHERE EXISTS (SELECT 1 FROM pg_roles AS r_role JOIN pg_auth_members AS am ON r_role.oid = am.member JOIN pg_roles AS r_group ON r_group.oid = am.roleid WHERE r_group.rolname = '${group}' AND r_role.rolname = '${role}') ${unless_comp} true", # lint:ignore:140chars
     db               => $psql_db,
     psql_user        => $psql_user,
+    psql_group       => $psql_group,
+    psql_path        => $psql_path,
     port             => $port,
     instance         => $instance,
     connect_settings => $connect_settings,

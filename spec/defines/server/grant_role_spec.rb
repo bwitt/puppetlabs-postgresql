@@ -43,6 +43,22 @@ describe 'postgresql::server::grant_role' do
     }
   end
 
+  context 'with a custom group and psql path on postgresql::server' do
+    let :pre_condition do
+      "class { 'postgresql::server': group => 'pgsql', psql_path => '/opt/pgsql/bin/psql' }"
+    end
+
+    it { is_expected.to contain_postgresql_psql("grant_role:#{title}").with_psql_group('pgsql').with_psql_path('/opt/pgsql/bin/psql') }
+  end
+
+  context 'with psql_group and psql_path' do
+    let(:params) do
+      super().merge(psql_group: 'other', psql_path: '/usr/local/bin/psql')
+    end
+
+    it { is_expected.to contain_postgresql_psql("grant_role:#{title}").with_psql_group('other').with_psql_path('/usr/local/bin/psql') }
+  end
+
   context 'with ensure => absent' do
     let(:params) do
       super().merge(ensure: 'absent')
