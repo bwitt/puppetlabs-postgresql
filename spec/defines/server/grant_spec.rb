@@ -94,7 +94,7 @@ describe 'postgresql::server::grant' do
     it do
       expect(subject).to contain_postgresql_psql('grant:test')
         .with_command(%r{GRANT USAGE ON ALL SEQUENCES IN SCHEMA "public" TO\s* "test"}m)
-        .with_unless(%r{SELECT 1 WHERE NOT EXISTS \(\s*SELECT sequence_name\s* FROM information_schema\.sequences\s* WHERE sequence_schema='public'\s* EXCEPT DISTINCT\s* SELECT object_name as sequence_name\s* FROM .* WHERE .*grantee='test'\s* AND object_schema='public'\s* AND privilege_type='USAGE'\s*\)}m) # rubocop:disable Layout/LineLength
+        .with_unless(%r{SELECT 1 WHERE NOT EXISTS \(\s*SELECT c\.relname AS sequence_name\s* FROM pg_catalog\.pg_class c\s* JOIN pg_catalog\.pg_namespace n ON c\.relnamespace = n\.oid\s* WHERE c\.relkind = 'S'\s* AND n\.nspname = 'public'\s* EXCEPT DISTINCT\s* SELECT object_name as sequence_name\s* FROM .* WHERE .*grantee='test'\s* AND object_schema='public'\s* AND privilege_type='USAGE'\s*\)}m) # rubocop:disable Layout/LineLength
     end
   end
 

@@ -180,9 +180,11 @@ define postgresql::server::grant (
 
       # This checks if there is a difference between the sequences in the
       # specified schema and the sequences for which the role has the specified
-      # privilege. It uses the EXCEPT clause which computes the set of rows
-      # that are in the result of the first SELECT statement but not in the
-      # result of the second one. It then counts the number of rows from this
+      # privilege. Sequences are read from pg_class because
+      # information_schema.sequences hides identity sequences. It uses the
+      # EXCEPT clause which computes the set of rows that are in the result of
+      # the first SELECT statement but not in the result of the second one. It
+      # then counts the number of rows from this
       # operation. If this number is zero then the role has the specified
       # privilege for all sequences in the schema and the whole query returns a
       # single row, which satisfies the `unless` parameter of Postgresql_psql.
@@ -191,9 +193,11 @@ define postgresql::server::grant (
       # execute the GRANT statement.
       if $ensure == 'present' {
         $custom_unless = "SELECT 1 WHERE NOT EXISTS (
-          SELECT sequence_name
-          FROM information_schema.sequences
-          WHERE sequence_schema='${schema}'
+          SELECT c.relname AS sequence_name
+          FROM pg_catalog.pg_class c
+               JOIN pg_catalog.pg_namespace n ON c.relnamespace = n.oid
+          WHERE c.relkind = 'S'
+            AND n.nspname = '${schema}'
             EXCEPT DISTINCT
           SELECT object_name as sequence_name
           FROM (
