@@ -321,8 +321,33 @@ describe 'postgresql::server' do
 
     it {
       expect(subject).to contain_file('/usr/local/sbin/pg_dump.sh')
-        .with_content(%r{.*pg_dumpall \$_pg_args --file=\$\{FILE\} \$@.*})
+        .with_content(%r{.*pg_dumpall \$_pg_args --file=\$\{FILE\} \$@ \|\| _rc=\$\?.*})
+        .with_content(%r{^if \[ \$_rc -eq 0 \] ; then$})
     }
+
+    context 'with multiple databases in directory format' do
+      let(:params) do
+        {
+          backup_enable: true,
+          backup_provider: 'pg_dump',
+          backup_options: {
+            db_user: 'backupuser',
+            db_password: 'backuppass',
+            dir: '/tmp/backuptest',
+            databases: ['db1', 'db2'],
+            format: 'directory',
+            manage_user: true
+          }
+        }
+      end
+
+      it {
+        expect(subject).to contain_file('/usr/local/sbin/pg_dump.sh')
+          .with_content(%r{^pg_dump \$_pg_args --file=\$\{FILE\} \$@ db1 \|\| _rc=\$\?$})
+          .with_content(%r{^pg_dump \$_pg_args --file=\$\{FILE\} \$@ db2 \|\| _rc=\$\?$})
+          .without_content(%r{^TEMPLATE=\$DIR$})
+      }
+    end
 
     it {
       expect(subject).to contain_cron('pg_dump backup job')

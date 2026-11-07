@@ -60,11 +60,7 @@ cleanup
 <% } -%>
 
 _pg_args=''
-
-<%- if $format == 'directory' { -%>
-# The 'directory' format expects a target directory instead of a file.
-TEMPLATE=$DIR
-<%- } -%>
+_rc=0
 
 <%- if $db_user { -%>
 _pg_args="${_pg_args} --username=<%= $db_user %>"
@@ -91,17 +87,17 @@ SUFFIX="${SUFFIX}.gz"
 # Dump only selected databases
   <%- $databases.each |$_db| { -%>
 FILE=`echo $TEMPLATE | sed "s/%FILENAME%/<%= $_db %>$SUFFIX/;"`
-pg_dump $_pg_args --file=${FILE} $@ <%= $_db %>
+pg_dump $_pg_args --file=${FILE} $@ <%= $_db %> || _rc=$?
   <%- } -%>
 <%- } else { -%>
 # Dump the whole instance
 FILE=`echo $TEMPLATE | sed "s/%FILENAME%/all$SUFFIX/;"`
-pg_dumpall $_pg_args --file=${FILE} $@
+pg_dumpall $_pg_args --file=${FILE} $@ || _rc=$?
 <%- } -%>
 
 <% unless $delete_before_dump { -%>
 # Remove outdated backups only if the new backup was successful.
-if [ $? -eq 0 ] ; then
+if [ $_rc -eq 0 ] ; then
     cleanup
     <%- if $success_file_path { -%>
     touch <%= $success_file_path %>
